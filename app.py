@@ -169,7 +169,7 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("### 👤 Datos del Paciente")
     id_pacientes = st.text_input("ID o Documento del Paciente", value="PED-2026-01")
-    fecha_nac = st.date_input("Fecha de Nacimiento", value=date(2026, 7, 28))
+    fecha_nac = st.date_input("Fecha de Nacimiento", value=date(2026, 7, 28), min_value=date(1900, 1, 1), max_value=date.today())
     dosis = st.selectbox("Número de Dosis a Evaluar", [1, 2, 3])
     
     fecha_ultima = None
