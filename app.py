@@ -74,14 +74,24 @@ def evaluar_pentaxim(paciente: PacienteContext, lote: LoteBiológico, fecha_eval
             mensaje=f"El lote {lote.numero_lote} está vencido desde {lote.fecha_vencimiento}."
         ))
 
-    # 2. Reglas Cronológicas
+# 2. Reglas Cronológicas
     dias_vida = (fecha_evaluacion - paciente.fecha_nacimiento).days
+
+    # Validar edad mínima (42 días / 6 semanas)
     if paciente.numero_dosis_a_evaluar == 1 and dias_vida < 42:
         bloqueos.append(ReglaInformativa(
             codigo_regla="ELIG_AGE_BELOW_MINIMUM",
             mensaje=f"Edad insuficiente ({dias_vida} días). Edad mínima requerida: 42 días (6 semanas)."
         ))
 
+    # Validar edad máxima tope para Pentaxim (7 años / 2555 días)
+    if dias_vida > 2555:
+        bloqueos.append(ReglaInformativa(
+            codigo_regla="ELIG_AGE_EXCEEDS_MAXIMUM",
+            mensaje=f"Paciente fuera del rango de edad pediátrica para Pentaxim ({dias_vida // 365} años). Biológico indicado únicamente para menores de 7 años."
+        ))
+
+    # Validar intervalo entre dosis
     if paciente.numero_dosis_a_evaluar > 1:
         if not paciente.fecha_ultima_dosis:
             bloqueos.append(ReglaInformativa(
@@ -95,7 +105,7 @@ def evaluar_pentaxim(paciente: PacienteContext, lote: LoteBiológico, fecha_eval
                     codigo_regla="ELIG_INTERVAL_TOO_SHORT",
                     mensaje=f"Intervalo insuficiente ({dias_intervalo} días). Mínimo requerido: 28 días."
                 ))
-
+                
     # 3. Reglas de Seguridad
     if paciente.antecedentes.encefalopatia_7d_previa:
         bloqueos.append(ReglaInformativa(
